@@ -1,0 +1,47 @@
+describe("Demoblaze - Laptop mais caro", () => {
+  it("extrai nome e preço do laptop mais caro da categoria Laptops", () => {
+    cy.visit("https://www.demoblaze.com/");
+
+    // Clica na categoria "Laptops" no menu lateral esquerdo
+    cy.contains("#itemc", "Laptops").click();
+
+    // Aguarda o carregamento dos produtos
+    cy.get("#tbodyid .card", { timeout: 10000 }).should("have.length.greaterThan", 0);
+    cy.get("#tbodyid .card-title a").first().should("be.visible");
+
+    // Extrai nome e preço de cada laptop e identifica o mais caro
+    cy.get("#tbodyid .card").then(($cards) => {
+      const laptops = [...$cards].map((card) => {
+        const nome = card.querySelector(".card-title a").innerText.trim();
+        const preco = parseFloat(
+          card.querySelector("h5").innerText.replace(/[^0-9.]/g, "")
+        );
+        return { nome, preco };
+      });
+
+      const maisCaro = laptops.reduce((max, atual) =>
+        atual.preco > max.preco ? atual : max
+      );
+
+      cy.log(`Laptop mais caro: ${maisCaro.nome} - $${maisCaro.preco}`);
+      cy.task("log", `Laptop mais caro: ${maisCaro.nome} - $${maisCaro.preco}`);
+
+      // Asserção: o valor extraído é superior a $0
+      expect(maisCaro.preco).to.be.greaterThan(0);
+    });
+  });
+});
+const { defineConfig } = require("cypress");
+
+module.exports = defineConfig({
+  e2e: {
+    setupNodeEvents(on) {
+      on("task", {
+        log(mensagem) {
+          console.log(mensagem);
+          return null;
+        },
+      });
+    },
+  },
+});

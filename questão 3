@@ -1,0 +1,27 @@
+describe("SauceDemo - Carrinho de compras", () => {
+  it("atualiza o ícone do carrinho ao adicionar e remover produtos", () => {
+    cy.visit("https://www.saucedemo.com/");
+
+    // 1. Login com sucesso
+    cy.get('[data-test="username"]').type("standard_user");
+    cy.get('[data-test="password"]').type("secret_sauce");
+    cy.get('[data-test="login-button"]').click();
+    cy.url().should("include", "/inventory.html");
+
+    // 2. Adiciona três produtos diferentes ao carrinho
+    cy.get('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+    cy.get('[data-test="add-to-cart-sauce-labs-bike-light"]').click();
+    cy.get('[data-test="add-to-cart-sauce-labs-bolt-t-shirt"]').click();
+
+    // Confirma que o carrinho está com 3 itens
+    cy.get('[data-test="shopping-cart-badge"]').should("have.text", "3");
+
+    // 3. Remove um dos produtos
+    cy.get('[data-test="remove-sauce-labs-bike-light"]').click();
+
+    // 4. Valida que o emblema do carrinho exibe exatamente "2"
+    cy.get('[data-test="shopping-cart-badge"]')
+      .should("be.visible")
+      .and("have.text", "2");
+  });
+});

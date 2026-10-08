@@ -1,0 +1,22 @@
+describe("Login - validação da mensagem de erro", () => {
+  beforeEach(() => {
+    cy.visit("https://the-internet.herokuapp.com/login");
+  });
+
+  it("exibe mensagem de erro estilizada ao logar com campos em branco", () => {
+    // Campos de usuário e senha em branco
+    cy.get("#username").clear();
+    cy.get("#password").clear();
+
+    // Clica em "Login"
+    cy.get('button[type="submit"]').click();
+
+    // 1. A mensagem contém o texto esperado
+    cy.get("#flash")
+      .should("be.visible")
+      .and("contain.text", "Your username is invalid!");
+
+    // 2. O balão de erro possui a classe CSS "error"
+    cy.get("#flash").should("have.class", "error");
+  });
+});

@@ -1,0 +1,21 @@
+describe("Dynamic Loading - Exemplo 1", () => {
+  beforeEach(() => {
+    cy.visit("https://the-internet.herokuapp.com/dynamic_loading/1");
+  });
+
+  it("aguarda o loading desaparecer e valida o texto final", () => {
+    // Clica no botão "Start"
+    cy.contains("#start button", "Start").click();
+
+    // Confirma que a barra de progresso ("Loading...") apareceu
+    cy.get("#loading").should("be.visible");
+
+    // Aguarda a barra de progresso desaparecer
+    cy.get("#loading", { timeout: 15000 }).should("not.be.visible");
+
+    // Valida o texto final
+    cy.get("#finish h4", { timeout: 15000 })
+      .should("be.visible")
+      .and("have.text", "Hello World!");
+  });
+});

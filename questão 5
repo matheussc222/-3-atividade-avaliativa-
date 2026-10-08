@@ -1,0 +1,50 @@
+describe("SauceDemo - Rastreador de ofertas", () => {
+  it("lista e salva os produtos que custam menos de $20.00", () => {
+    cy.visit("https://www.saucedemo.com/");
+
+    // Login
+    cy.get('[data-test="username"]').type("standard_user");
+    cy.get('[data-test="password"]').type("secret_sauce");
+    cy.get('[data-test="login-button"]').click();
+    cy.url().should("include", "/inventory.html");
+
+    // Mapeia todos os itens da vitrine
+    cy.get('[data-test="inventory-item"]').should("have.length.greaterThan", 0);
+
+    cy.get('[data-test="inventory-item"]').then(($itens) => {
+      const produtos = [...$itens].map((item) => ({
+        nome: item.querySelector('[data-test="inventory-item-name"]').innerText.trim(),
+        preco: parseFloat(
+          item.querySelector('[data-test="inventory-item-price"]').innerText.replace("$", "")
+        ),
+      }));
+
+      // Filtra apenas os produtos abaixo de $20.00
+      const ofertas = produtos.filter((p) => p.preco < 20);
+
+      // Exibe no console do terminal
+      ofertas.forEach((p) => cy.task("log", `OFERTA: ${p.nome} - $${p.preco.toFixed(2)}`));
+
+      // Salva em arquivo
+      cy.writeFile("cypress/results/ofertas.json", ofertas);
+
+      // Asserções
+      expect(produtos.length).to.be.greaterThan(0);
+      ofertas.forEach((p) => expect(p.preco).to.be.lessThan(20));
+    });
+  });
+});
+const { defineConfig } = require("cypress");
+
+module.exports = defineConfig({
+  e2e: {
+    setupNodeEvents(on) {
+      on("task", {
+        log(mensagem) {
+          console.log(mensagem);
+          return null;
+        },
+      });
+    },
+  },
+});
